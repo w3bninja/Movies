@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Movie Library</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🎬 Movie Library</h1>
+    <div class="topbar-actions">
+      <span id="status" class="status"></span>
+      <button id="openBtn" class="btn" title="Open your local movies.json to enable editing and saving">Edit Library</button>
+      <button id="saveBtn" class="btn" disabled>Save</button>
+      <button id="addBtn" class="btn btn-primary" disabled>+ Add Movie</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Search by title, category, or subcategory…" disabled />
+    <select id="categoryFilter" disabled>
+      <option value="">All categories</option>
+    </select>
+    <select id="sortBy" disabled>
+      <option value="title">Sort: Title</option>
+      <option value="year">Sort: Year</option>
+      <option value="category">Sort: Category</option>
+    </select>
+  </div>
+
+  <main id="empty" class="empty-state">
+    <p>Couldn't load movies.json automatically.</p>
+    <p class="empty-sub">Click <strong>Edit Library</strong> to pick the file manually.</p>
+  </main>
+
+  <main id="grid" class="grid hidden"></main>
+
+  <!-- Add/Edit modal -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="modalTitle">Add Movie</h2>
+      <form id="movieForm">
+        <label>Title
+          <input type="text" id="fieldTitle" required />
+        </label>
+        <label>Year
+          <input type="number" id="fieldYear" min="1878" max="2100" />
+        </label>
+        <label>Category
+          <input type="text" id="fieldCategory" list="categoryList" />
+          <datalist id="categoryList"></datalist>
+        </label>
+        <label>Subcategory
+          <input type="text" id="fieldSubcategory" list="subcategoryList" />
+          <datalist id="subcategoryList"></datalist>
+        </label>
+        <label>Cover image URL
+          <input type="url" id="fieldCover" placeholder="https://…" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="deleteBtn" class="btn btn-danger hidden">Delete</button>
+          <div class="modal-actions-right">
+            <button type="button" id="cancelBtn" class="btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Movie</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

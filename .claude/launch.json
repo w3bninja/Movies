@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "movies",
+      "runtimeExecutable": "powershell.exe",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\Users\\e51033\\Claude\\movies\\.claude\\server.ps1"
+      ],
+      "port": 5500
+    }
+  ]
+}

@@ -1,0 +1,374 @@
+{
+  "media_library": {
+    "version": "2.0",
+    "last_updated": "2026-07-21",
+    "total_categories": 6,
+    "categories": [
+      {
+        "category_name": "Disney & Classic Animation",
+        "subcategories": [
+          {
+            "name": "Walt Disney & Pixar Feature Films",
+            "count": 68,
+            "items": [
+              "Snow White and the Seven Dwarfs (1937)",
+              "Pinocchio (1940)",
+              "Fantasia (1940)",
+              "Dumbo (1941)",
+              "Bambi (1942)",
+              "Cinderella (1950)",
+              "Alice in Wonderland (1951)",
+              "Peter Pan (1953)",
+              "Lady and the Tramp (1955)",
+              "Sleeping Beauty (1959)",
+              "One Hundred and One Dalmatians (1961)",
+              "The Sword in the Stone (1963)",
+              "The Jungle Book (1967)",
+              "The Aristocats (1970)",
+              "Robin Hood (1973)",
+              "The Many Adventures of Winnie the Pooh (1977)",
+              "The Rescuers (1977)",
+              "The Fox and the Hound (1981)",
+              "The Black Cauldron (1985)",
+              "The Great Mouse Detective (1986)",
+              "Oliver & Company (1988)",
+              "The Little Mermaid (1989)",
+              "The Rescuers Down Under (1990)",
+              "Beauty and the Beast (1991)",
+              "Aladdin (1992)",
+              "The Lion King (1994)",
+              "Pocahontas (1995)",
+              "Toy Story (1995)",
+              "The Hunchback of Notre Dame (1996)",
+              "Hercules (1997)",
+              "Mulan (1998)",
+              "A Bug's Life (1998)",
+              "Tarzan (1999)",
+              "Toy Story 2 (1999)",
+              "Fantasia 2000 (2000)",
+              "Dinosaur (2000)",
+              "The Emperor's New Groove (2000)",
+              "Atlantis: The Lost Empire (2001)",
+              "Monsters, Inc. (2001)",
+              "Lilo & Stitch (2002)",
+              "Treasure Planet (2002)",
+              "Finding Nemo (2003)",
+              "Brother Bear (2003)",
+              "Home on the Range (2004)",
+              "The Incredibles (2004)",
+              "Chicken Little (2005)",
+              "Cars (2006)",
+              "Meet the Robinsons (2007)",
+              "Ratatouille (2007)",
+              "WALL-E (2008)",
+              "Bolt (2008)",
+              "Up (2009)",
+              "The Princess and the Frog (2009)",
+              "Toy Story 3 (2010)",
+              "Tangled (2010)",
+              "Cars 2 (2011)",
+              "Winnie the Pooh (2011)",
+              "Brave (2012)",
+              "Wreck-It Ralph (2012)",
+              "Frozen (2013)",
+              "Monsters University (2013)",
+              "Big Hero 6 (2014)",
+              "Inside Out (2015)",
+              "The Good Dinosaur (2015)",
+              "Zootopia (2016)",
+              "Finding Dory (2016)",
+              "Moana (2016)",
+              "Cars 3 (2017)",
+              "Coco (2017)",
+              "Incredibles 2 (2018)",
+              "Toy Story 4 (2019)"
+            ]
+          },
+          {
+            "name": "Non-Disney Animation (In Disney Folder)",
+            "count": 4,
+            "items": [
+              "Anastasia (1997)",
+              "The Prince of Egypt (1998)",
+              "The Adventures of Brer Rabbit (2006)",
+              "Ever After: A Cinderella Story (1998)"
+            ]
+          }
+        ]
+      },
+      {
+        "category_name": "Studio Ghibli & Pre-Ghibli",
+        "subcategories": [
+          {
+            "name": "Studio Ghibli Features",
+            "count": 10,
+            "items": [
+              "Castle in the Sky (1986)",
+              "My Neighbor Totoro (1988)",
+              "Kiki's Delivery Service (1989)",
+              "Ocean Waves (1993)",
+              "Whispers of the Heart (1995)",
+              "Princess Mononoke (1997)",
+              "Spirited Away (2001)",
+              "The Cat Returns (2002)",
+              "Howl's Moving Castle (2004)",
+              "Ponyo on the Cliff by the Sea (2008)"
+            ]
+          },
+          {
+            "name": "Pre-Ghibli & TV Classics",
+            "count": 7,
+            "items": [
+              "Little Norse Prince (1968)",
+              "Panda! Go, Panda! (1972)",
+              "Future Boy Conan (Discs 1–3) (1978 Series)",
+              "The Castle of Cagliostro (1979)",
+              "Gauche the Cellist (1982)",
+              "Sherlock Hound (1984 Series)",
+              "Nausicaä of the Valley of the Wind (1984)"
+            ]
+          }
+        ]
+      },
+      {
+        "category_name": "Franchise Collections",
+        "subcategories": [
+          {
+            "name": "Star Wars Collection",
+            "count": 8,
+            "items": [
+              "Star Wars: Episode IV – A New Hope (1977)",
+              "Star Wars: Episode VI – Return of the Jedi (1983)",
+              "Star Wars: Episode II – Attack of the Clones (2002)",
+              "Star Wars: Episode III – Revenge of the Sith (2005)",
+              "Star Wars: Episode VII – The Force Awakens (2015)",
+              "Star Wars: Episode VIII – The Last Jedi (2017)",
+              "Rogue One: A Star Wars Story (2016)"
+            ]
+          },
+          {
+            "name": "Star Trek Collection",
+            "count": 3,
+            "items": [
+              "Star Trek: Nemesis (2002)",
+              "Star Trek (2009)",
+              "Star Trek Into Darkness (2013)"
+            ]
+          }
+        ]
+      },
+      {
+        "category_name": "Classics & Westerns",
+        "subcategories": [
+          {
+            "name": "John Wayne Westerns",
+            "count": 16,
+            "items": [
+              "The Hurricane Express (1932 Serial)",
+              "The Three Musketeers (1933 Serial)",
+              "Blue Steel (1934)",
+              "The Lawless Frontier (1934)",
+              "Neath the Arizona Skies (1934)",
+              "Randy Rides Alone (1934)",
+              "The Star Packer (1934)",
+              "The Trail Beyond (1934)",
+              "West of the Divide (1934)",
+              "The Dawn Rider (1935)",
+              "The Desert Trail (1935)",
+              "Paradise Canyon (1935)",
+              "Rainbow Valley (1935)",
+              "Texas Terror (1935)",
+              "Winds of the Wasteland (1936)",
+              "Angel and the Badman (1947)"
+            ]
+          },
+          {
+            "name": "John Wayne Non-Westerns",
+            "count": 4,
+            "items": [
+              "Shadow of the Eagle (1932 Serial)",
+              "His Private Secretary (1933)",
+              "Island in the Sky (1953)",
+              "The High and the Mighty (1954)"
+            ]
+          }
+        ]
+      },
+      {
+        "category_name": "Superheroes & Blockbusters",
+        "subcategories": [
+          {
+            "name": "Marvel Cinematic Universe (MCU)",
+            "count": 17,
+            "items": [
+              "Iron Man (2008)",
+              "Iron Man 2 (2010)",
+              "Iron Man 3 (2013)",
+              "Thor (2011)",
+              "Thor: The Dark World (2013)",
+              "Thor: Ragnarok (2017)",
+              "Captain America: The First Avenger (2011)",
+              "Captain America: Civil War (2016)",
+              "The Avengers (2012)",
+              "Avengers: Age of Ultron (2015)",
+              "Avengers: Infinity War (2018)",
+              "Avengers: Endgame (2019)",
+              "Ant-Man (2015)",
+              "Ant-Man and the Wasp (2018)",
+              "Doctor Strange (2016)",
+              "Guardians of the Galaxy Vol. 1 (2014)",
+              "Guardians of the Galaxy Vol. 2 (2017)",
+              "Spider-Man: Homecoming (2017)",
+              "Spider-Man: Far From Home (2019)",
+              "Black Panther (2018)",
+              "Captain Marvel (2019)"
+            ]
+          },
+          {
+            "name": "Other Spider-Man & X-Men",
+            "count": 10,
+            "items": [
+              "Spider-Man (2002)",
+              "Spider-Man 2 (2004)",
+              "Spider-Man 3 (2007)",
+              "The Amazing Spider-Man (2012)",
+              "The Amazing Spider-Man 2 (2014)",
+              "Spider-Man: Into the Spider-Verse (2018)",
+              "Venom (2018)",
+              "X-Men (2000)",
+              "X2 (2003)",
+              "X-Men: The Last Stand (2006)",
+              "Dark Phoenix (2019)"
+            ]
+          },
+          {
+            "name": "DC Universe & Other Adaptations",
+            "count": 14,
+            "items": [
+              "Batman (1989)",
+              "Batman Begins (2005)",
+              "The Dark Knight (2008)",
+              "The Dark Knight Rises (2012)",
+              "Batman v Superman: Dawn of Justice (2016)",
+              "Wonder Woman (2017)",
+              "Aquaman (2018)",
+              "Constantine (2005)",
+              "The Rocketeer (1991)",
+              "The Phantom (1996)",
+              "Hellboy (2004)",
+              "Hellboy II: The Golden Army (2008)",
+              "Fantastic Four (2005)",
+              "Fantastic Four: Rise of the Silver Surfer (2007)",
+              "Watchmen (2009)",
+              "V for Vendetta (2005)"
+            ]
+          },
+          {
+            "name": "Sci-Fi & Franchises",
+            "count": 18,
+            "items": [
+              "Back to the Future (1985)",
+              "Back to the Future Part II (1989)",
+              "Back to the Future Part III (1990)",
+              "The Matrix (1999)",
+              "The Matrix Reloaded (2003)",
+              "The Matrix Revolutions (2003)",
+              "Transformers (2007)",
+              "Transformers: Revenge of the Fallen (2009)",
+              "Transformers: Dark of the Moon (2011)",
+              "Men in Black (1997)",
+              "Men in Black II (2002)",
+              "Demolition Man (1993)",
+              "Super Mario Bros. (1993)",
+              "Mortal Kombat (1995)",
+              "Death Race (2008)",
+              "Jumper (2008)",
+              "Cowboys & Aliens (2011)",
+              "The Dark Tower (2017)",
+              "Glass (2019)"
+            ]
+          }
+        ]
+      },
+      {
+        "category_name": "Uncategorized Root",
+        "subcategories": [
+          {
+            "name": "Major Collections & Franchises",
+            "count": 15,
+            "items": [
+              "The Lord of the Rings: The Fellowship of the Ring (2001)",
+              "The Lord of the Rings: The Two Towers (2002)",
+              "The Lord of the Rings: The Return of the King (2003)",
+              "The Hobbit: An Unexpected Journey (2012)",
+              "The Hobbit: The Desolation of Smaug (2013)",
+              "The Hobbit: The Battle of the Five Armies (2014)",
+              "Raiders of the Lost Ark (1981)",
+              "Indiana Jones and the Temple of Doom (1984)",
+              "Indiana Jones and the Last Crusade (1989)",
+              "Indiana Jones and the Kingdom of the Crystal Skull (2008)",
+              "Planet of the Apes (1968)",
+              "Beneath the Planet of the Apes (1970)",
+              "Escape from the Planet of the Apes (1971)",
+              "Conquest of the Planet of the Apes (1972)",
+              "Battle for the Planet of the Apes (1973)",
+              "Ernest Goes to Camp (1987)",
+              "Ernest Goes to Jail (1990)",
+              "Ernest Scared Stupid (1991)"
+            ]
+          },
+          {
+            "name": "Standalone Films",
+            "count": 30,
+            "items": [
+              "Alita: Battle Angel (2019)",
+              "Avatar (2009)",
+              "The Fugitive (1993)",
+              "Gone in 60 Seconds (2000)",
+              "Independence Day (1996)",
+              "Inception (2010)",
+              "John Wick (2014)",
+              "Jurassic Park (1993)",
+              "The Mummy (1999)",
+              "The Patriot (2000)",
+              "The Shawshank Redemption (1994)",
+              "The Green Mile (1999)",
+              "Full Metal Jacket (1987)",
+              "Ben-Hur (1959)",
+              "The Ten Commandments (1956)",
+              "The Great Escape (1963)",
+              "The Godfather (1972)",
+              "The Godfather Part II (1974)",
+              "The Godfather Part III (1990)",
+              "No Country for Old Men (2007)",
+              "The Notebook (2004)",
+              "Little Women (2019)",
+              "Ace Ventura: Pet Detective (1994)",
+              "Ace Ventura: When Nature Calls (1995)",
+              "Austin Powers: International Man of Mystery (1997)",
+              "Austin Powers: The Spy Who Shagged Me (1999)",
+              "The Big Lebowski (1998)",
+              "Dumb and Dumber (1994)",
+              "Dodgeball: A True Underdog Story (2004)",
+              "Talladega Nights: The Ballad of Ricky Bobby (2006)",
+              "The Breakfast Club (1985)",
+              "Three Amigos! (1986)",
+              "RV (2006)",
+              "The Waterboy (1998)",
+              "The Sound of Music (1965)",
+              "West Side Story (1961)",
+              "Grease (1978)",
+              "Hairspray (2007)",
+              "My Fair Lady (1964)",
+              "Ray (2004)",
+              "Walk the Line (2005)",
+              "Sympathy for Mr. Vengeance (2002)",
+              "Oldboy (2003)",
+              "Lady Vengeance (2005)"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
