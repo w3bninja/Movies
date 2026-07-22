@@ -54,7 +54,8 @@ for ($i = 0; $i -lt $movies.Count; $i++) {
   }
 }
 
-$movies | ConvertTo-Json -Depth 5 | Set-Content -Path $MoviesPath -Encoding utf8
+$json = $movies | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText($MoviesPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 Write-Host "Done. Found covers for $found movies. $($notFound.Count) without covers."
 $notFoundPath = Join-Path (Split-Path -Parent $MoviesPath) ".claude\covers-not-found.txt"
 $notFound | Set-Content -Path $notFoundPath -Encoding utf8

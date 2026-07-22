@@ -30,5 +30,6 @@ foreach ($category in $source.media_library.categories) {
   }
 }
 
-$movies | ConvertTo-Json -Depth 5 | Set-Content -Path $OutPath -Encoding utf8
+$json = $movies | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText($OutPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 Write-Host "Wrote $($movies.Count) movies to $OutPath"
