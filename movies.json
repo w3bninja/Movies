@@ -3415,6 +3415,54 @@
       "category": "Disney & Classic Animation",
       "subcategory": "Walt Disney & Pixar Feature Films",
       "cover": ""
+    },
+    {
+      "id": "m0428",
+      "title": "Hulk",
+      "year": 2003,
+      "category": "Superheroes & Blockbusters",
+      "subcategory": "Other Spider-Man & X-Men",
+      "cover": ""
+    },
+    {
+      "id": "m0429",
+      "title": "The Incredible Hulk",
+      "year": 2008,
+      "category": "Superheroes & Blockbusters",
+      "subcategory": "Marvel Cinematic Universe (MCU)",
+      "cover": ""
+    },
+    {
+      "id": "m0430",
+      "title": "The League of Extraordinary Gentlemen",
+      "year": 2003,
+      "category": "Superheroes & Blockbusters",
+      "subcategory": "DC Universe & Other Adaptations",
+      "cover": ""
+    },
+    {
+      "id": "m0431",
+      "title": "Captain America",
+      "year": 1990,
+      "category": "Superheroes & Blockbusters",
+      "subcategory": "Other Spider-Man & X-Men",
+      "cover": ""
+    },
+    {
+      "id": "m0432",
+      "title": "Ultraviolet",
+      "year": 2006,
+      "category": "Superheroes & Blockbusters",
+      "subcategory": "Sci-Fi & Franchises",
+      "cover": ""
+    },
+    {
+      "id": "m0433",
+      "title": "Wanted",
+      "year": 2008,
+      "category": "Superheroes & Blockbusters",
+      "subcategory": "Sci-Fi & Franchises",
+      "cover": ""
     }
   ],
   "categories": [
