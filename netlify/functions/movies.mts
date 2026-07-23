@@ -3,7 +3,6 @@ import { getStore } from "@netlify/blobs";
 
 const STORE_NAME = "movie-library";
 const KEY = "movies";
-// Redeploy trigger: env var scope needed "runtime", not just "functions".
 
 export default async (req: Request, context: Context) => {
   const store = getStore(STORE_NAME);
