@@ -12,7 +12,7 @@ export default async (req: Request, context: Context) => {
   if (req.method === "GET") {
     const library = await store.get(KEY, { type: "json" });
     return new Response(JSON.stringify(library ?? EMPTY_LIBRARY), {
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json; charset=utf-8" },
     });
   }
 
@@ -21,7 +21,7 @@ export default async (req: Request, context: Context) => {
     if (!token || token !== Netlify.env.get("MOVIES_EDIT_TOKEN")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json; charset=utf-8" },
       });
     }
 
@@ -31,7 +31,7 @@ export default async (req: Request, context: Context) => {
     } catch {
       return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json; charset=utf-8" },
       });
     }
 
