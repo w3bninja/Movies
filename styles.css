@@ -137,9 +137,7 @@ body {
   padding: 24px;
 }
 
-.grid.hidden,
-.empty-state.hidden,
-.modal-overlay.hidden {
+.hidden {
   display: none;
 }
 
