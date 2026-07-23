@@ -282,6 +282,17 @@ body {
   min-width: 200px;
 }
 
+.view-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.view-toggle .icon-btn.active {
+  background: var(--accent);
+  color: #1a1a1a;
+  border-color: var(--accent);
+}
+
 .empty-state {
   text-align: center;
   padding: 80px 20px;
@@ -373,6 +384,83 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.grid.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 24px;
+}
+
+.list-view .card {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 12px;
+}
+
+.list-view .card:hover {
+  transform: none;
+}
+
+.list-view .card-cover {
+  width: 40px;
+  aspect-ratio: 2 / 3;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.list-view .card-cover.placeholder {
+  font-size: 1.2rem;
+}
+
+.list-view .card-body {
+  padding: 6px 0;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.list-view .card-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-view .card-meta {
+  flex-shrink: 0;
+  width: 260px;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.list-view .card-meta span:first-child {
+  width: 42px;
+}
+
+.list-view .card-meta span:last-child {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.list-view .card-sub {
+  flex-shrink: 0;
+  width: 220px;
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .list-view .card-meta,
+  .list-view .card-sub {
+    display: none;
+  }
 }
 
 .modal-overlay {

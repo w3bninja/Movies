@@ -3,11 +3,13 @@
 const API_URL = "/api/movies";
 const TOKEN_KEY = "moviesEditToken";
 const SIDEBAR_KEY = "moviesSidebarCollapsed";
+const VIEW_MODE_KEY = "moviesViewMode";
 
 const state = {
   movies: [],
   categories: [],
   activeCategory: "",
+  viewMode: "grid",
   dirty: false,
   editingId: null,
 };
@@ -17,6 +19,8 @@ const el = {
   addBtn: document.getElementById("addBtn"),
   search: document.getElementById("search"),
   sortBy: document.getElementById("sortBy"),
+  viewGridBtn: document.getElementById("viewGridBtn"),
+  viewListBtn: document.getElementById("viewListBtn"),
   empty: document.getElementById("empty"),
   grid: document.getElementById("grid"),
   sidebar: document.getElementById("sidebar"),
@@ -49,8 +53,23 @@ function enableControls() {
   el.addBtn.disabled = false;
   el.search.disabled = false;
   el.sortBy.disabled = false;
+  el.viewGridBtn.disabled = false;
+  el.viewListBtn.disabled = false;
   el.newCategoryInput.disabled = false;
   el.addCategoryForm.querySelector("button").disabled = false;
+}
+
+function initViewMode() {
+  const stored = localStorage.getItem(VIEW_MODE_KEY);
+  setViewMode(stored === "list" ? "list" : "grid");
+}
+
+function setViewMode(mode) {
+  state.viewMode = mode;
+  el.grid.classList.toggle("list-view", mode === "list");
+  el.viewGridBtn.classList.toggle("active", mode === "grid");
+  el.viewListBtn.classList.toggle("active", mode === "list");
+  localStorage.setItem(VIEW_MODE_KEY, mode);
 }
 
 function genMovieId() {
@@ -122,6 +141,7 @@ function applyLibrary(data) {
   state.dirty = false;
   enableControls();
   initSidebarState();
+  initViewMode();
   refreshCategoryOptions();
   renderCategoryNav();
   render();
@@ -455,6 +475,8 @@ el.modalOverlay.addEventListener("click", (evt) => {
 });
 el.search.addEventListener("input", render);
 el.sortBy.addEventListener("change", render);
+el.viewGridBtn.addEventListener("click", () => setViewMode("grid"));
+el.viewListBtn.addEventListener("click", () => setViewMode("list"));
 
 el.sidebarToggle.addEventListener("click", () => setSidebarCollapsed(true));
 el.sidebarOpenBtn.addEventListener("click", () => setSidebarCollapsed(false));
