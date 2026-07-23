@@ -1,17 +1,16 @@
 "use strict";
 
+const API_URL = "/api/movies";
+const TOKEN_KEY = "moviesEditToken";
+
 const state = {
   movies: [],
-  fileHandle: null,
   dirty: false,
   editingId: null,
 };
 
 const el = {
   status: document.getElementById("status"),
-  openBtn: document.getElementById("openBtn"),
-  reconnectBtn: document.getElementById("reconnectBtn"),
-  downloadBtn: document.getElementById("downloadBtn"),
   addBtn: document.getElementById("addBtn"),
   search: document.getElementById("search"),
   categoryFilter: document.getElementById("categoryFilter"),
@@ -32,8 +31,6 @@ const el = {
   cancelBtn: document.getElementById("cancelBtn"),
 };
 
-const supportsFSAccess = "showOpenFilePicker" in window;
-
 function setStatus(text, dirty = false) {
   el.status.textContent = text;
   el.status.classList.toggle("dirty", dirty);
@@ -50,165 +47,53 @@ function genMovieId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
-// ---------- IndexedDB (remembers the linked file handle across reloads) ----------
-
-const DB_NAME = "movie-library-db";
-const STORE_NAME = "handles";
-const HANDLE_KEY = "moviesFileHandle";
-
-function idbOpen() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains(STORE_NAME)) {
-        req.result.createObjectStore(STORE_NAME);
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+function getEditToken() {
+  return localStorage.getItem(TOKEN_KEY);
 }
 
-async function idbSetHandle(handle) {
-  const db = await idbOpen();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    tx.objectStore(STORE_NAME).put(handle, HANDLE_KEY);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+function promptForToken() {
+  const token = prompt("Enter your edit token to enable saving:");
+  if (token) localStorage.setItem(TOKEN_KEY, token.trim());
+  return token ? token.trim() : null;
 }
 
-async function idbGetHandle() {
-  const db = await idbOpen();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const req = tx.objectStore(STORE_NAME).get(HANDLE_KEY);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
+// ---------- Data loading ----------
 
-// ---------- File I/O ----------
-
-async function init() {
-  if (!supportsFSAccess) {
-    autoLoadLibrary();
-    return;
-  }
+async function loadLibrary() {
   try {
-    const handle = await idbGetHandle();
-    if (!handle) {
-      autoLoadLibrary();
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      applyMovies(data);
+      setStatus(`${state.movies.length} movies`);
+      el.search.focus();
       return;
     }
-    const perm = await handle.queryPermission({ mode: "readwrite" });
-    if (perm === "granted") {
-      await connectHandle(handle, false);
-    } else {
-      await autoLoadLibrary();
-      offerReconnect(handle);
-    }
+    // API reachable but empty — fall back to the bundled snapshot so the
+    // page isn't blank before the store has ever been seeded.
+    await loadStaticFallback();
   } catch (err) {
     console.error(err);
-    autoLoadLibrary();
+    await loadStaticFallback();
   }
 }
 
-function offerReconnect(handle) {
-  el.reconnectBtn.classList.remove("hidden");
-  el.reconnectBtn.onclick = async () => {
-    try {
-      const perm = await handle.requestPermission({ mode: "readwrite" });
-      if (perm === "granted") {
-        el.reconnectBtn.classList.add("hidden");
-        await connectHandle(handle, false);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-}
-
-async function connectHandle(handle, requestIfNeeded) {
-  if (requestIfNeeded) {
-    const perm = await handle.requestPermission({ mode: "readwrite" });
-    if (perm !== "granted") throw new Error("Permission not granted");
-  }
-  const file = await handle.getFile();
-  const text = await file.text();
-  loadMovies(text);
-  state.fileHandle = handle;
-  el.reconnectBtn.classList.add("hidden");
-  el.openBtn.textContent = "Change File";
-  setStatus(`${state.movies.length} movies — auto-saving to ${file.name}`);
-  el.search.focus();
-}
-
-async function autoLoadLibrary() {
+async function loadStaticFallback() {
   try {
     const res = await fetch("movies.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    const text = await res.text();
-    loadMovies(text);
-    setStatus(`${state.movies.length} movies`);
+    const data = await res.json();
+    applyMovies(data);
+    setStatus(`${state.movies.length} movies (offline snapshot — edits may not save)`, true);
     el.search.focus();
   } catch (err) {
     console.error(err);
-    setStatus("Couldn't auto-load movies.json — use Connect to pick it manually.");
+    setStatus("Couldn't load the movie library.");
   }
 }
 
-async function openLibrary() {
-  try {
-    if (supportsFSAccess) {
-      const [handle] = await window.showOpenFilePicker({
-        types: [
-          {
-            description: "JSON file",
-            accept: { "application/json": [".json"] },
-          },
-        ],
-        excludeAcceptAllOption: false,
-        multiple: false,
-      });
-      await idbSetHandle(handle);
-      await connectHandle(handle, true);
-    } else {
-      // Fallback for browsers without File System Access API (e.g. Firefox)
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "application/json";
-      input.onchange = async () => {
-        const file = input.files[0];
-        if (!file) return;
-        const text = await file.text();
-        state.fileHandle = null;
-        loadMovies(text);
-        setStatus(`Loaded ${file.name} — this browser can't auto-save; use Download after making changes`);
-      };
-      input.click();
-    }
-  } catch (err) {
-    if (err.name !== "AbortError") {
-      console.error(err);
-      alert("Could not open file: " + err.message);
-    }
-  }
-}
-
-function loadMovies(text) {
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch (err) {
-    alert("That file isn't valid JSON: " + err.message);
-    return;
-  }
-  if (!Array.isArray(data)) {
-    alert("Expected the JSON file to contain an array of movies.");
-    return;
-  }
+function applyMovies(data) {
   state.movies = data.map((m) => ({
     id: m.id || genMovieId(),
     title: m.title || "Untitled",
@@ -223,45 +108,43 @@ function loadMovies(text) {
   render();
 }
 
-async function autoSave() {
-  if (!state.fileHandle) {
-    state.dirty = true;
-    setStatus(
-      supportsFSAccess
-        ? "Unsaved — click Connect movies.json to enable auto-save"
-        : "Unsaved — click Download movies.json to export your changes",
-      true
-    );
-    if (!supportsFSAccess) el.downloadBtn.classList.remove("hidden");
-    return;
+async function saveLibrary() {
+  let token = getEditToken();
+  if (!token) {
+    token = promptForToken();
+    if (!token) {
+      state.dirty = true;
+      setStatus("Unsaved — an edit token is required to save", true);
+      return;
+    }
   }
+
   setStatus("Saving…");
-  const json = JSON.stringify(state.movies, null, 2);
   try {
-    const writable = await state.fileHandle.createWritable();
-    await writable.write(json);
-    await writable.close();
+    const res = await fetch(API_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-edit-token": token,
+      },
+      body: JSON.stringify(state.movies),
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      state.dirty = true;
+      setStatus("Wrong edit token — click any edit to try again", true);
+      return;
+    }
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
     state.dirty = false;
     setStatus(`${state.movies.length} movies — saved`);
   } catch (err) {
     console.error(err);
     state.dirty = true;
-    setStatus("Couldn't save automatically — check file permissions", true);
+    setStatus("Couldn't save — check your connection", true);
   }
-}
-
-function downloadLibrary() {
-  const json = JSON.stringify(state.movies, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "movies.json";
-  a.click();
-  URL.revokeObjectURL(url);
-  state.dirty = false;
-  setStatus(`${state.movies.length} movies — downloaded`);
-  el.downloadBtn.classList.add("hidden");
 }
 
 // ---------- Rendering ----------
@@ -379,7 +262,7 @@ function handleFormSubmit(evt) {
   refreshCategoryOptions();
   render();
   closeModal();
-  autoSave();
+  saveLibrary();
 }
 
 function handleDelete() {
@@ -389,13 +272,11 @@ function handleDelete() {
   refreshCategoryOptions();
   render();
   closeModal();
-  autoSave();
+  saveLibrary();
 }
 
 // ---------- Events ----------
 
-el.openBtn.addEventListener("click", openLibrary);
-el.downloadBtn.addEventListener("click", downloadLibrary);
 el.addBtn.addEventListener("click", () => openModal(null));
 el.cancelBtn.addEventListener("click", closeModal);
 el.deleteBtn.addEventListener("click", handleDelete);
@@ -427,4 +308,4 @@ window.addEventListener("beforeunload", (evt) => {
   }
 });
 
-init();
+loadLibrary();

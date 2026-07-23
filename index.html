@@ -11,9 +11,6 @@
     <h1>🎬 Movie Library</h1>
     <div class="topbar-actions">
       <span id="status" class="status"></span>
-      <button id="reconnectBtn" class="btn btn-primary hidden" title="Browser needs a quick permission re-grant to keep saving to your file">Reconnect to Save</button>
-      <button id="downloadBtn" class="btn hidden" title="This browser can't auto-save to disk — download the updated file instead">Download movies.json</button>
-      <button id="openBtn" class="btn" title="Link your local movies.json once to enable auto-save">Connect movies.json</button>
       <button id="addBtn" class="btn btn-primary" disabled>+ Add Movie</button>
     </div>
   </header>
@@ -31,8 +28,8 @@
   </div>
 
   <main id="empty" class="empty-state">
-    <p>Couldn't load movies.json automatically.</p>
-    <p class="empty-sub">Click <strong>Connect movies.json</strong> to pick the file manually.</p>
+    <p>Couldn't load the movie library.</p>
+    <p class="empty-sub">Check your connection and reload the page.</p>
   </main>
 
   <main id="grid" class="grid hidden"></main>

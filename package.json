@@ -1,0 +1,10 @@
+{
+  "name": "movie-library",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.8.2"
+  }
+}
