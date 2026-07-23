@@ -388,13 +388,16 @@ body {
   border-color: var(--accent);
 }
 
+.scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .empty-state {
   text-align: center;
   padding: 80px 20px;
   color: var(--text-dim);
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .empty-state p { margin: 4px 0; }
@@ -405,9 +408,6 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 20px;
   padding: 24px;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .hidden {
