@@ -7,32 +7,46 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <h1>🎬 Movie Library</h1>
-    <div class="topbar-actions">
-      <span id="status" class="status"></span>
-      <button id="addBtn" class="btn btn-primary" disabled>+ Add Movie</button>
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <span>Categories</span>
+        <button id="sidebarToggle" class="icon-btn" title="Collapse sidebar" aria-label="Collapse sidebar">&laquo;</button>
+      </div>
+      <nav id="categoryNav" class="category-nav"></nav>
+      <form id="addCategoryForm" class="add-category-form">
+        <input id="newCategoryInput" type="text" placeholder="New category…" disabled />
+        <button type="submit" class="btn btn-small" disabled>+</button>
+      </form>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button id="sidebarOpenBtn" class="icon-btn hidden" title="Show categories" aria-label="Show categories">&raquo;</button>
+        <h1>🎬 Movie Library</h1>
+        <div class="topbar-actions">
+          <span id="status" class="status"></span>
+          <button id="addBtn" class="btn btn-primary" disabled>+ Add Movie</button>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search by title, category, or subcategory…" disabled />
+        <select id="sortBy" disabled>
+          <option value="title">Sort: Title</option>
+          <option value="year">Sort: Year</option>
+          <option value="category">Sort: Category</option>
+        </select>
+      </div>
+
+      <main id="empty" class="empty-state">
+        <p>Couldn't load the movie library.</p>
+        <p class="empty-sub">Check your connection and reload the page.</p>
+      </main>
+
+      <main id="grid" class="grid hidden"></main>
     </div>
-  </header>
-
-  <div class="toolbar">
-    <input id="search" type="search" placeholder="Search by title, category, or subcategory…" disabled />
-    <select id="categoryFilter" disabled>
-      <option value="">All categories</option>
-    </select>
-    <select id="sortBy" disabled>
-      <option value="title">Sort: Title</option>
-      <option value="year">Sort: Year</option>
-      <option value="category">Sort: Category</option>
-    </select>
   </div>
-
-  <main id="empty" class="empty-state">
-    <p>Couldn't load the movie library.</p>
-    <p class="empty-sub">Check your connection and reload the page.</p>
-  </main>
-
-  <main id="grid" class="grid hidden"></main>
 
   <!-- Add/Edit modal -->
   <div id="modalOverlay" class="modal-overlay hidden">

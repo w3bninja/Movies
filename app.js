@@ -2,9 +2,12 @@
 
 const API_URL = "/api/movies";
 const TOKEN_KEY = "moviesEditToken";
+const SIDEBAR_KEY = "moviesSidebarCollapsed";
 
 const state = {
   movies: [],
+  categories: [],
+  activeCategory: "",
   dirty: false,
   editingId: null,
 };
@@ -13,10 +16,15 @@ const el = {
   status: document.getElementById("status"),
   addBtn: document.getElementById("addBtn"),
   search: document.getElementById("search"),
-  categoryFilter: document.getElementById("categoryFilter"),
   sortBy: document.getElementById("sortBy"),
   empty: document.getElementById("empty"),
   grid: document.getElementById("grid"),
+  sidebar: document.getElementById("sidebar"),
+  sidebarToggle: document.getElementById("sidebarToggle"),
+  sidebarOpenBtn: document.getElementById("sidebarOpenBtn"),
+  categoryNav: document.getElementById("categoryNav"),
+  addCategoryForm: document.getElementById("addCategoryForm"),
+  newCategoryInput: document.getElementById("newCategoryInput"),
   modalOverlay: document.getElementById("modalOverlay"),
   modalTitle: document.getElementById("modalTitle"),
   movieForm: document.getElementById("movieForm"),
@@ -40,8 +48,9 @@ function setStatus(text, dirty = false) {
 function enableControls() {
   el.addBtn.disabled = false;
   el.search.disabled = false;
-  el.categoryFilter.disabled = false;
   el.sortBy.disabled = false;
+  el.newCategoryInput.disabled = false;
+  el.addCategoryForm.querySelector("button").disabled = false;
 }
 
 function genMovieId() {
@@ -65,8 +74,8 @@ async function loadLibrary() {
     const res = await fetch(API_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      applyMovies(data);
+    if (data && Array.isArray(data.movies) && data.movies.length > 0) {
+      applyLibrary(data);
       setStatus(`${state.movies.length} movies`);
       el.search.focus();
       return;
@@ -85,7 +94,7 @@ async function loadStaticFallback() {
     const res = await fetch("movies.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const data = await res.json();
-    applyMovies(data);
+    applyLibrary(data);
     setStatus(`${state.movies.length} movies (offline snapshot — edits may not save)`, true);
     el.search.focus();
   } catch (err) {
@@ -94,8 +103,13 @@ async function loadStaticFallback() {
   }
 }
 
-function applyMovies(data) {
-  state.movies = data.map((m) => ({
+function applyLibrary(data) {
+  // Accepts either the current { movies, categories } shape or a bare
+  // array (older snapshot format) for backwards compatibility.
+  const rawMovies = Array.isArray(data) ? data : data.movies || [];
+  const rawCategories = Array.isArray(data) ? [] : data.categories || [];
+
+  state.movies = rawMovies.map((m) => ({
     id: m.id || genMovieId(),
     title: m.title || "Untitled",
     year: m.year ?? "",
@@ -103,10 +117,29 @@ function applyMovies(data) {
     subcategory: m.subcategory || "",
     cover: m.cover || "",
   }));
+  state.categories = [...rawCategories];
+  syncCategories();
   state.dirty = false;
   enableControls();
+  initSidebarState();
   refreshCategoryOptions();
+  renderCategoryNav();
   render();
+}
+
+// Ensures every category actually used by a movie is also present in the
+// persisted categories list (e.g. typed directly into the movie form).
+function syncCategories() {
+  const used = new Set(state.movies.map((m) => m.category).filter(Boolean));
+  let changed = false;
+  used.forEach((name) => {
+    if (!state.categories.includes(name)) {
+      state.categories.push(name);
+      changed = true;
+    }
+  });
+  if (changed) state.categories.sort((a, b) => a.localeCompare(b));
+  return changed;
 }
 
 async function saveLibrary() {
@@ -128,7 +161,7 @@ async function saveLibrary() {
         "Content-Type": "application/json",
         "x-edit-token": token,
       },
-      body: JSON.stringify(state.movies),
+      body: JSON.stringify({ movies: state.movies, categories: state.categories }),
     });
 
     if (res.status === 401) {
@@ -148,16 +181,81 @@ async function saveLibrary() {
   }
 }
 
+// ---------- Sidebar / category nav ----------
+
+function initSidebarState() {
+  const collapsed = localStorage.getItem(SIDEBAR_KEY) === "1";
+  setSidebarCollapsed(collapsed);
+}
+
+function setSidebarCollapsed(collapsed) {
+  el.sidebar.classList.toggle("collapsed", collapsed);
+  el.sidebarOpenBtn.classList.toggle("hidden", !collapsed);
+  localStorage.setItem(SIDEBAR_KEY, collapsed ? "1" : "0");
+}
+
+function renderCategoryNav() {
+  const counts = {};
+  state.movies.forEach((m) => {
+    if (m.category) counts[m.category] = (counts[m.category] || 0) + 1;
+  });
+
+  const allItem = `
+    <div class="category-item ${!state.activeCategory ? "active" : ""}" data-category="">
+      <span class="category-label">All Categories</span>
+      <span class="category-count">${state.movies.length}</span>
+    </div>`;
+
+  const categoryItems = state.categories
+    .map((name) => {
+      const count = counts[name] || 0;
+      const active = state.activeCategory === name ? "active" : "";
+      return `
+        <div class="category-item ${active}" data-category="${escapeHtml(name)}">
+          <span class="category-label">${escapeHtml(name)}</span>
+          <span class="category-count">${count}</span>
+          <button type="button" class="category-delete" data-delete-category="${escapeHtml(name)}"
+            title="${count ? "Move its movies to another category before deleting" : "Delete empty category"}"
+            ${count ? "disabled" : ""}>&times;</button>
+        </div>`;
+    })
+    .join("");
+
+  el.categoryNav.innerHTML = allItem + categoryItems;
+}
+
+function handleAddCategory(evt) {
+  evt.preventDefault();
+  const name = el.newCategoryInput.value.trim();
+  if (!name) return;
+  if (!state.categories.includes(name)) {
+    state.categories.push(name);
+    state.categories.sort((a, b) => a.localeCompare(b));
+    renderCategoryNav();
+    refreshCategoryOptions();
+    saveLibrary();
+  }
+  el.newCategoryInput.value = "";
+}
+
+function handleDeleteCategory(name) {
+  const inUse = state.movies.some((m) => m.category === name);
+  if (inUse) return;
+  if (!confirm(`Delete the empty category "${name}"?`)) return;
+  state.categories = state.categories.filter((c) => c !== name);
+  if (state.activeCategory === name) state.activeCategory = "";
+  renderCategoryNav();
+  refreshCategoryOptions();
+  render();
+  saveLibrary();
+}
+
 // ---------- Rendering ----------
 
 function refreshCategoryOptions() {
-  const categories = [...new Set(state.movies.map((m) => m.category).filter(Boolean))].sort();
-  const currentFilter = el.categoryFilter.value;
-  el.categoryFilter.innerHTML = '<option value="">All categories</option>' +
-    categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
-  el.categoryFilter.value = categories.includes(currentFilter) ? currentFilter : "";
-
-  el.categoryList.innerHTML = categories.map((c) => `<option value="${escapeHtml(c)}"></option>`).join("");
+  el.categoryList.innerHTML = state.categories
+    .map((c) => `<option value="${escapeHtml(c)}"></option>`)
+    .join("");
 
   const subcategories = [...new Set(state.movies.map((m) => m.subcategory).filter(Boolean))].sort();
   el.subcategoryList.innerHTML = subcategories.map((s) => `<option value="${escapeHtml(s)}"></option>`).join("");
@@ -173,7 +271,7 @@ function escapeHtml(str) {
 
 function getFilteredSorted() {
   const q = el.search.value.trim().toLowerCase();
-  const category = el.categoryFilter.value;
+  const category = state.activeCategory;
   const sortBy = el.sortBy.value;
 
   let list = state.movies.filter((m) => {
@@ -228,7 +326,7 @@ function openModal(movie) {
   el.modalTitle.textContent = movie ? "Edit Movie" : "Add Movie";
   el.fieldTitle.value = movie ? movie.title : "";
   el.fieldYear.value = movie ? movie.year : "";
-  el.fieldCategory.value = movie ? movie.category : "";
+  el.fieldCategory.value = movie ? movie.category : state.activeCategory;
   el.fieldSubcategory.value = movie ? movie.subcategory : "";
   el.fieldCover.value = movie ? movie.cover : "";
   el.deleteBtn.classList.toggle("hidden", !movie);
@@ -260,6 +358,8 @@ function handleFormSubmit(evt) {
     state.movies.push(movie);
   }
 
+  syncCategories();
+  renderCategoryNav();
   refreshCategoryOptions();
   render();
   closeModal();
@@ -270,6 +370,7 @@ function handleDelete() {
   if (!state.editingId) return;
   if (!confirm("Delete this movie from your library?")) return;
   state.movies = state.movies.filter((m) => m.id !== state.editingId);
+  renderCategoryNav();
   refreshCategoryOptions();
   render();
   closeModal();
@@ -287,8 +388,27 @@ el.modalOverlay.addEventListener("click", (evt) => {
   if (evt.target === el.modalOverlay) closeModal();
 });
 el.search.addEventListener("input", render);
-el.categoryFilter.addEventListener("change", render);
 el.sortBy.addEventListener("change", render);
+
+el.sidebarToggle.addEventListener("click", () => setSidebarCollapsed(true));
+el.sidebarOpenBtn.addEventListener("click", () => setSidebarCollapsed(false));
+
+el.addCategoryForm.addEventListener("submit", handleAddCategory);
+
+el.categoryNav.addEventListener("click", (evt) => {
+  const delBtn = evt.target.closest(".category-delete");
+  if (delBtn) {
+    if (delBtn.disabled) return;
+    handleDeleteCategory(delBtn.dataset.deleteCategory);
+    return;
+  }
+  const item = evt.target.closest(".category-item");
+  if (item) {
+    state.activeCategory = item.dataset.category;
+    renderCategoryNav();
+    render();
+  }
+});
 
 el.grid.addEventListener("click", (evt) => {
   const card = evt.target.closest(".card");

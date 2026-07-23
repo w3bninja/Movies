@@ -4,12 +4,14 @@ import { getStore } from "@netlify/blobs";
 const STORE_NAME = "movie-library";
 const KEY = "movies";
 
+const EMPTY_LIBRARY = { movies: [], categories: [] };
+
 export default async (req: Request, context: Context) => {
   const store = getStore(STORE_NAME);
 
   if (req.method === "GET") {
-    const movies = await store.get(KEY, { type: "json" });
-    return new Response(JSON.stringify(movies ?? []), {
+    const library = await store.get(KEY, { type: "json" });
+    return new Response(JSON.stringify(library ?? EMPTY_LIBRARY), {
       headers: { "Content-Type": "application/json" },
     });
   }
@@ -23,26 +25,34 @@ export default async (req: Request, context: Context) => {
       });
     }
 
-    let movies: unknown;
+    let body: unknown;
     try {
-      movies = await req.json();
+      body = await req.json();
     } catch {
       return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
-    if (!Array.isArray(movies)) {
-      return new Response(JSON.stringify({ error: "Expected an array of movies" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+
+    const library = body as { movies?: unknown; categories?: unknown };
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !Array.isArray(library.movies) ||
+      !Array.isArray(library.categories)
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Expected { movies: [], categories: [] }" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    await store.setJSON(KEY, movies);
-    return new Response(JSON.stringify({ ok: true, count: movies.length }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    await store.setJSON(KEY, { movies: library.movies, categories: library.categories });
+    return new Response(
+      JSON.stringify({ ok: true, movieCount: library.movies.length, categoryCount: library.categories.length }),
+      { headers: { "Content-Type": "application/json" } }
+    );
   }
 
   return new Response("Method Not Allowed", { status: 405 });
