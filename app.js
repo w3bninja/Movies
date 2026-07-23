@@ -181,6 +181,72 @@ async function saveLibrary() {
   }
 }
 
+// ---------- Auto-enrichment (fills blank year/cover from Wikipedia) ----------
+
+async function lookupOnWikipedia(title, year) {
+  const query = year ? `${title} ${year} film` : `${title} film`;
+  const searchUrl =
+    "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=1&srsearch=" +
+    encodeURIComponent(query);
+
+  const searchRes = await fetch(searchUrl);
+  if (!searchRes.ok) return null;
+  const searchData = await searchRes.json();
+  const hit = searchData?.query?.search?.[0];
+  if (!hit) return null;
+
+  const summaryUrl =
+    "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(hit.title.replace(/ /g, "_"));
+  const summaryRes = await fetch(summaryUrl);
+  if (!summaryRes.ok) return null;
+  const summary = await summaryRes.json();
+
+  const looksLikeFilm = /(?:^|\s)(film|movie)(?:\s|$)/i.test(summary.description || "");
+  if (!looksLikeFilm) return null;
+
+  const yearMatch = (summary.extract || "").match(/\b(19\d{2}|20\d{2})\b/);
+
+  return {
+    year: yearMatch ? Number(yearMatch[1]) : null,
+    cover: summary.thumbnail?.source || null,
+  };
+}
+
+async function maybeEnrichMovie(id) {
+  const movie = state.movies.find((m) => m.id === id);
+  if (!movie) return;
+  const needsYear = !movie.year;
+  const needsCover = !movie.cover;
+  if (!needsYear && !needsCover) return;
+
+  try {
+    const result = await lookupOnWikipedia(movie.title, movie.year);
+    if (!result) return;
+
+    // Re-fetch the movie in case it was edited/deleted while the lookup was in flight.
+    const current = state.movies.find((m) => m.id === id);
+    if (!current) return;
+
+    let changed = false;
+    if (needsYear && result.year) {
+      current.year = result.year;
+      changed = true;
+    }
+    if (needsCover && result.cover) {
+      current.cover = result.cover;
+      changed = true;
+    }
+
+    if (changed) {
+      render();
+      setStatus(`Filled in details for "${current.title}" from Wikipedia`);
+      await saveLibrary();
+    }
+  } catch (err) {
+    console.error("Auto-enrich failed:", err);
+  }
+}
+
 // ---------- Sidebar / category nav ----------
 
 function initSidebarState() {
@@ -363,7 +429,7 @@ function handleFormSubmit(evt) {
   refreshCategoryOptions();
   render();
   closeModal();
-  saveLibrary();
+  saveLibrary().then(() => maybeEnrichMovie(movie.id));
 }
 
 function handleDelete() {
