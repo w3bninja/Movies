@@ -2010,11 +2010,49 @@
                    }
                ],
     "categories":  [
-                       "Classics \u0026 Westerns",
-                       "Disney \u0026 Classic Animation",
-                       "Franchise Collections",
-                       "Studio Ghibli \u0026 Pre-Ghibli",
-                       "Superheroes \u0026 Blockbusters",
-                       "Uncategorized Root"
+                       {
+                           "name":  "Classics \u0026 Westerns",
+                           "subcategories":  [
+                                                 "John Wayne Non-Westerns",
+                                                 "John Wayne Westerns"
+                                             ]
+                       },
+                       {
+                           "name":  "Disney \u0026 Classic Animation",
+                           "subcategories":  [
+                                                 "Non-Disney Animation (In Disney Folder)",
+                                                 "Walt Disney \u0026 Pixar Feature Films"
+                                             ]
+                       },
+                       {
+                           "name":  "Franchise Collections",
+                           "subcategories":  [
+                                                 "Star Trek Collection",
+                                                 "Star Wars Collection"
+                                             ]
+                       },
+                       {
+                           "name":  "Studio Ghibli \u0026 Pre-Ghibli",
+                           "subcategories":  [
+                                                 "Pre-Ghibli \u0026 TV Classics",
+                                                 "Studio Ghibli Features"
+                                             ]
+                       },
+                       {
+                           "name":  "Superheroes \u0026 Blockbusters",
+                           "subcategories":  [
+                                                 "DC Universe \u0026 Other Adaptations",
+                                                 "Marvel Cinematic Universe (MCU)",
+                                                 "Other Spider-Man \u0026 X-Men",
+                                                 "Sci-Fi \u0026 Franchises"
+                                             ]
+                       },
+                       {
+                           "name":  "Uncategorized Root",
+                           "subcategories":  [
+                                                 "Major Collections \u0026 Franchises",
+                                                 "Standalone Films"
+                                             ]
+                       }
                    ]
 }

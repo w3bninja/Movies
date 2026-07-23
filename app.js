@@ -7,8 +7,10 @@ const VIEW_MODE_KEY = "moviesViewMode";
 
 const state = {
   movies: [],
-  categories: [],
+  categories: [], // [{ name, subcategories: [] }]
   activeCategory: "",
+  activeSubcategory: "",
+  expandedCategories: new Set(),
   viewMode: "grid",
   dirty: false,
   editingId: null,
@@ -136,7 +138,7 @@ function applyLibrary(data) {
     subcategory: m.subcategory || "",
     cover: m.cover || "",
   }));
-  state.categories = [...rawCategories];
+  state.categories = normalizeCategories(rawCategories);
   syncCategories();
   state.dirty = false;
   enableControls();
@@ -147,19 +149,42 @@ function applyLibrary(data) {
   render();
 }
 
-// Ensures every category actually used by a movie is also present in the
-// persisted categories list (e.g. typed directly into the movie form).
+// Accepts either the current [{name, subcategories}] shape or a bare
+// string array (older format) for backwards compatibility.
+function normalizeCategories(raw) {
+  return raw.map((c) =>
+    typeof c === "string"
+      ? { name: c, subcategories: [] }
+      : { name: c.name, subcategories: Array.isArray(c.subcategories) ? [...c.subcategories] : [] }
+  );
+}
+
+function findCategory(name) {
+  return state.categories.find((c) => c.name === name);
+}
+
+function getOrCreateCategory(name) {
+  let cat = findCategory(name);
+  if (!cat) {
+    cat = { name, subcategories: [] };
+    state.categories.push(cat);
+    state.categories.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  return cat;
+}
+
+// Ensures every category/subcategory actually used by a movie is also
+// present in the persisted categories list (e.g. typed directly into the
+// movie form) — so nothing typed on a movie gets silently lost.
 function syncCategories() {
-  const used = new Set(state.movies.map((m) => m.category).filter(Boolean));
-  let changed = false;
-  used.forEach((name) => {
-    if (!state.categories.includes(name)) {
-      state.categories.push(name);
-      changed = true;
+  state.movies.forEach((m) => {
+    if (!m.category) return;
+    const cat = getOrCreateCategory(m.category);
+    if (m.subcategory && !cat.subcategories.includes(m.subcategory)) {
+      cat.subcategories.push(m.subcategory);
+      cat.subcategories.sort((a, b) => a.localeCompare(b));
     }
   });
-  if (changed) state.categories.sort((a, b) => a.localeCompare(b));
-  return changed;
 }
 
 async function saveLibrary() {
@@ -280,29 +305,72 @@ function setSidebarCollapsed(collapsed) {
   localStorage.setItem(SIDEBAR_KEY, collapsed ? "1" : "0");
 }
 
-function renderCategoryNav() {
+function movieCounts() {
   const counts = {};
   state.movies.forEach((m) => {
-    if (m.category) counts[m.category] = (counts[m.category] || 0) + 1;
+    if (!m.category) return;
+    counts[m.category] = (counts[m.category] || 0) + 1;
+    if (m.subcategory) {
+      const key = m.category + " " + m.subcategory;
+      counts[key] = (counts[key] || 0) + 1;
+    }
   });
+  return counts;
+}
+
+function renderCategoryNav() {
+  const counts = movieCounts();
 
   const allItem = `
     <div class="category-item ${!state.activeCategory ? "active" : ""}" data-category="">
+      <span class="category-expand"></span>
       <span class="category-label">All Categories</span>
       <span class="category-count">${state.movies.length}</span>
     </div>`;
 
   const categoryItems = state.categories
-    .map((name) => {
-      const count = counts[name] || 0;
-      const active = state.activeCategory === name ? "active" : "";
+    .map((cat) => {
+      const count = counts[cat.name] || 0;
+      const isActive = state.activeCategory === cat.name && !state.activeSubcategory;
+      const isExpanded = state.expandedCategories.has(cat.name);
+      const chevron = isExpanded ? "&#9662;" : "&#9656;";
+
+      const subRows = cat.subcategories
+        .map((sub) => {
+          const subCount = counts[cat.name + " " + sub] || 0;
+          const subActive = state.activeCategory === cat.name && state.activeSubcategory === sub;
+          return `
+            <div class="subcategory-item ${subActive ? "active" : ""}"
+              data-category="${escapeHtml(cat.name)}" data-subcategory="${escapeHtml(sub)}">
+              <span class="category-label">${escapeHtml(sub)}</span>
+              <span class="category-count">${subCount}</span>
+              <button type="button" class="category-edit" data-edit-subcategory="${escapeHtml(sub)}"
+                data-parent-category="${escapeHtml(cat.name)}" title="Rename subcategory">&#9998;</button>
+              <button type="button" class="category-delete" data-delete-subcategory="${escapeHtml(sub)}"
+                data-parent-category="${escapeHtml(cat.name)}"
+                title="${subCount ? "Move its movies to another subcategory before deleting" : "Delete empty subcategory"}"
+                ${subCount ? "disabled" : ""}>&times;</button>
+            </div>`;
+        })
+        .join("");
+
+      const subForm = `
+        <form class="add-subcategory-form" data-parent-category="${escapeHtml(cat.name)}">
+          <input type="text" class="new-subcategory-input" placeholder="New subcategory…" />
+          <button type="submit" class="btn btn-small">+</button>
+        </form>`;
+
       return `
-        <div class="category-item ${active}" data-category="${escapeHtml(name)}">
-          <span class="category-label">${escapeHtml(name)}</span>
-          <span class="category-count">${count}</span>
-          <button type="button" class="category-delete" data-delete-category="${escapeHtml(name)}"
-            title="${count ? "Move its movies to another category before deleting" : "Delete empty category"}"
-            ${count ? "disabled" : ""}>&times;</button>
+        <div class="category-group">
+          <div class="category-item ${isActive ? "active" : ""}" data-category="${escapeHtml(cat.name)}">
+            <span class="category-expand" data-expand-category="${escapeHtml(cat.name)}">${chevron}</span>
+            <span class="category-label">${escapeHtml(cat.name)}</span>
+            <span class="category-count">${count}</span>
+            <button type="button" class="category-delete" data-delete-category="${escapeHtml(cat.name)}"
+              title="${count ? "Move its movies to another category before deleting" : "Delete empty category"}"
+              ${count ? "disabled" : ""}>&times;</button>
+          </div>
+          ${isExpanded ? `<div class="subcategory-list">${subRows}${subForm}</div>` : ""}
         </div>`;
     })
     .join("");
@@ -314,9 +382,8 @@ function handleAddCategory(evt) {
   evt.preventDefault();
   const name = el.newCategoryInput.value.trim();
   if (!name) return;
-  if (!state.categories.includes(name)) {
-    state.categories.push(name);
-    state.categories.sort((a, b) => a.localeCompare(b));
+  if (!findCategory(name)) {
+    getOrCreateCategory(name);
     renderCategoryNav();
     refreshCategoryOptions();
     saveLibrary();
@@ -328,8 +395,72 @@ function handleDeleteCategory(name) {
   const inUse = state.movies.some((m) => m.category === name);
   if (inUse) return;
   if (!confirm(`Delete the empty category "${name}"?`)) return;
-  state.categories = state.categories.filter((c) => c !== name);
-  if (state.activeCategory === name) state.activeCategory = "";
+  state.categories = state.categories.filter((c) => c.name !== name);
+  state.expandedCategories.delete(name);
+  if (state.activeCategory === name) {
+    state.activeCategory = "";
+    state.activeSubcategory = "";
+  }
+  renderCategoryNav();
+  refreshCategoryOptions();
+  render();
+  saveLibrary();
+}
+
+function handleAddSubcategory(parentName, input) {
+  const name = input.value.trim();
+  if (!name) return;
+  const cat = findCategory(parentName);
+  if (!cat) return;
+  if (!cat.subcategories.includes(name)) {
+    cat.subcategories.push(name);
+    cat.subcategories.sort((a, b) => a.localeCompare(b));
+    renderCategoryNav();
+    refreshCategoryOptions();
+    saveLibrary();
+  }
+  input.value = "";
+}
+
+function handleDeleteSubcategory(parentName, subName) {
+  const inUse = state.movies.some((m) => m.category === parentName && m.subcategory === subName);
+  if (inUse) return;
+  if (!confirm(`Delete the empty subcategory "${subName}"?`)) return;
+  const cat = findCategory(parentName);
+  if (!cat) return;
+  cat.subcategories = cat.subcategories.filter((s) => s !== subName);
+  if (state.activeCategory === parentName && state.activeSubcategory === subName) {
+    state.activeSubcategory = "";
+  }
+  renderCategoryNav();
+  refreshCategoryOptions();
+  render();
+  saveLibrary();
+}
+
+function handleRenameSubcategory(parentName, oldName) {
+  const cat = findCategory(parentName);
+  if (!cat) return;
+  const newName = prompt(`Rename subcategory "${oldName}" to:`, oldName);
+  if (!newName) return;
+  const trimmed = newName.trim();
+  if (!trimmed || trimmed === oldName) return;
+  if (cat.subcategories.includes(trimmed)) {
+    alert(`"${trimmed}" already exists under "${parentName}".`);
+    return;
+  }
+
+  cat.subcategories = cat.subcategories.filter((s) => s !== oldName);
+  cat.subcategories.push(trimmed);
+  cat.subcategories.sort((a, b) => a.localeCompare(b));
+
+  state.movies.forEach((m) => {
+    if (m.category === parentName && m.subcategory === oldName) m.subcategory = trimmed;
+  });
+  if (state.activeCategory === parentName && state.activeSubcategory === oldName) {
+    state.activeSubcategory = trimmed;
+  }
+
   renderCategoryNav();
   refreshCategoryOptions();
   render();
@@ -340,11 +471,17 @@ function handleDeleteCategory(name) {
 
 function refreshCategoryOptions() {
   el.categoryList.innerHTML = state.categories
-    .map((c) => `<option value="${escapeHtml(c)}"></option>`)
+    .map((c) => `<option value="${escapeHtml(c.name)}"></option>`)
     .join("");
+  updateSubcategoryOptions(el.fieldCategory.value.trim());
+}
 
-  const subcategories = [...new Set(state.movies.map((m) => m.subcategory).filter(Boolean))].sort();
-  el.subcategoryList.innerHTML = subcategories.map((s) => `<option value="${escapeHtml(s)}"></option>`).join("");
+function updateSubcategoryOptions(categoryName) {
+  const cat = findCategory(categoryName);
+  const subs = cat
+    ? cat.subcategories
+    : [...new Set(state.categories.flatMap((c) => c.subcategories))].sort((a, b) => a.localeCompare(b));
+  el.subcategoryList.innerHTML = subs.map((s) => `<option value="${escapeHtml(s)}"></option>`).join("");
 }
 
 function escapeHtml(str) {
@@ -358,6 +495,7 @@ function escapeHtml(str) {
 function getFilteredSorted() {
   const q = el.search.value.trim().toLowerCase();
   const category = state.activeCategory;
+  const subcategory = state.activeSubcategory;
   const sortBy = el.sortBy.value;
 
   let list = state.movies.filter((m) => {
@@ -367,7 +505,8 @@ function getFilteredSorted() {
       (m.category || "").toLowerCase().includes(q) ||
       (m.subcategory || "").toLowerCase().includes(q);
     const matchesCategory = !category || m.category === category;
-    return matchesQuery && matchesCategory;
+    const matchesSubcategory = !subcategory || m.subcategory === subcategory;
+    return matchesQuery && matchesCategory && matchesSubcategory;
   });
 
   list = list.slice().sort((a, b) => {
@@ -413,9 +552,10 @@ function openModal(movie) {
   el.fieldTitle.value = movie ? movie.title : "";
   el.fieldYear.value = movie ? movie.year : "";
   el.fieldCategory.value = movie ? movie.category : state.activeCategory;
-  el.fieldSubcategory.value = movie ? movie.subcategory : "";
+  el.fieldSubcategory.value = movie ? movie.subcategory : state.activeSubcategory;
   el.fieldCover.value = movie ? movie.cover : "";
   el.deleteBtn.classList.toggle("hidden", !movie);
+  updateSubcategoryOptions(el.fieldCategory.value.trim());
   el.modalOverlay.classList.remove("hidden");
   el.fieldTitle.focus();
 }
@@ -473,6 +613,7 @@ el.movieForm.addEventListener("submit", handleFormSubmit);
 el.modalOverlay.addEventListener("click", (evt) => {
   if (evt.target === el.modalOverlay) closeModal();
 });
+el.fieldCategory.addEventListener("input", () => updateSubcategoryOptions(el.fieldCategory.value.trim()));
 el.search.addEventListener("input", render);
 el.sortBy.addEventListener("change", render);
 el.viewGridBtn.addEventListener("click", () => setViewMode("grid"));
@@ -483,16 +624,57 @@ el.sidebarOpenBtn.addEventListener("click", () => setSidebarCollapsed(false));
 
 el.addCategoryForm.addEventListener("submit", handleAddCategory);
 
+el.categoryNav.addEventListener("submit", (evt) => {
+  const form = evt.target.closest(".add-subcategory-form");
+  if (!form) return;
+  evt.preventDefault();
+  const input = form.querySelector(".new-subcategory-input");
+  handleAddSubcategory(form.dataset.parentCategory, input);
+});
+
 el.categoryNav.addEventListener("click", (evt) => {
+  const editBtn = evt.target.closest(".category-edit");
+  if (editBtn) {
+    handleRenameSubcategory(editBtn.dataset.parentCategory, editBtn.dataset.editSubcategory);
+    return;
+  }
+
   const delBtn = evt.target.closest(".category-delete");
   if (delBtn) {
     if (delBtn.disabled) return;
-    handleDeleteCategory(delBtn.dataset.deleteCategory);
+    if (delBtn.dataset.deleteSubcategory) {
+      handleDeleteSubcategory(delBtn.dataset.parentCategory, delBtn.dataset.deleteSubcategory);
+    } else {
+      handleDeleteCategory(delBtn.dataset.deleteCategory);
+    }
     return;
   }
+
+  const expandBtn = evt.target.closest(".category-expand");
+  if (expandBtn && expandBtn.dataset.expandCategory) {
+    const name = expandBtn.dataset.expandCategory;
+    if (state.expandedCategories.has(name)) {
+      state.expandedCategories.delete(name);
+    } else {
+      state.expandedCategories.add(name);
+    }
+    renderCategoryNav();
+    return;
+  }
+
+  const subItem = evt.target.closest(".subcategory-item");
+  if (subItem) {
+    state.activeCategory = subItem.dataset.category;
+    state.activeSubcategory = subItem.dataset.subcategory;
+    renderCategoryNav();
+    render();
+    return;
+  }
+
   const item = evt.target.closest(".category-item");
   if (item) {
     state.activeCategory = item.dataset.category;
+    state.activeSubcategory = "";
     renderCategoryNav();
     render();
   }
