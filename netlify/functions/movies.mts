@@ -3,6 +3,7 @@ import { getStore } from "@netlify/blobs";
 
 const STORE_NAME = "movie-library";
 const KEY = "movies";
+// Redeploy trigger: env var must be baked in at deploy time.
 
 export default async (req: Request, context: Context) => {
   const store = getStore(STORE_NAME);
