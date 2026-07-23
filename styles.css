@@ -222,6 +222,8 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 10;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .modal {
@@ -231,10 +233,30 @@ body {
   padding: 24px;
   width: 100%;
   max-width: 380px;
+  max-height: 100%;
+  overflow-y: auto;
+  position: relative;
 }
 
 .modal h2 {
   margin-top: 0;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal-close:hover {
+  color: var(--text);
 }
 
 #movieForm {

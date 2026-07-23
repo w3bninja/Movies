@@ -29,6 +29,7 @@ const el = {
   subcategoryList: document.getElementById("subcategoryList"),
   deleteBtn: document.getElementById("deleteBtn"),
   cancelBtn: document.getElementById("cancelBtn"),
+  modalCloseBtn: document.getElementById("modalCloseBtn"),
 };
 
 function setStatus(text, dirty = false) {
@@ -279,6 +280,7 @@ function handleDelete() {
 
 el.addBtn.addEventListener("click", () => openModal(null));
 el.cancelBtn.addEventListener("click", closeModal);
+el.modalCloseBtn.addEventListener("click", closeModal);
 el.deleteBtn.addEventListener("click", handleDelete);
 el.movieForm.addEventListener("submit", handleFormSubmit);
 el.modalOverlay.addEventListener("click", (evt) => {
